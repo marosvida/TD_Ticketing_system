@@ -184,7 +184,25 @@ contract TicketingSystem {
     }
 
     //FUNCTIONS TEST 5 -- CONCERT CASHOUT
-    function cashOutConcert(uint256 _concertId, address payable _cashOutAddress) public {}
+    function cashOutConcert(uint256 _concertId, address payable _cashOutAddress) public {
+        require(artistsRegister[concertsRegister[_concertId].artistId].owner == msg.sender, "should be the artist");
+        require(concertsRegister[_concertId].concertDate <= block.timestamp, "should be after the concert");
+
+        uint256 totalMoneyCollected = concertsRegister[_concertId].totalMoneyCollected;
+
+        uint256 venue1Commission = venuesRegister[concertsRegister[_concertId].venueId].standardComission;
+        uint256 venueShare = (totalMoneyCollected * venue1Commission) / 10000;
+        uint256 artistShare = totalMoneyCollected - venueShare;
+
+        uint256 totalTicketSold = concertsRegister[_concertId].totalSoldTicket;
+        artistsRegister[concertsRegister[_concertId].artistId].totalTicketSold += totalTicketSold;
+
+        (bool sent, bytes memory data) = _cashOutAddress.call{value: artistShare}("");
+        require(sent, "Failed to send Ether");
+
+        (sent, data) = venuesRegister[concertsRegister[_concertId].venueId].owner.call{value: venueShare}("");
+        require(sent, "Failed to send Ether");
+    }
 
     //FUNCTIONS TEST 6 -- TICKET SELLING
     function offerTicketForSale(uint256 _ticketId, uint256 _salePrice) public {}
