@@ -205,8 +205,25 @@ contract TicketingSystem {
     }
 
     //FUNCTIONS TEST 6 -- TICKET SELLING
-    function offerTicketForSale(uint256 _ticketId, uint256 _salePrice) public {}
+    function offerTicketForSale(uint256 _ticketId, uint256 _salePrice) public {
+        require(ticketsRegister[_ticketId].owner == msg.sender, "should be the owner");
+        require(ticketsRegister[_ticketId].amountPaid >= _salePrice, "should be less than the amount paid");
 
-    function buySecondHandTicket(uint256 _ticketId) public payable {}
+        ticketsRegister[_ticketId].isAvailableForSale = true;
+        ticketsRegister[_ticketId].amountPaid = _salePrice;
+    }
+
+    function buySecondHandTicket(uint256 _ticketId) public payable {
+        require(ticketsRegister[_ticketId].isAvailable == true, "should be available");
+        require(msg.value == ticketsRegister[_ticketId].amountPaid, "not enough funds");
+
+        address payable previousOwner = ticketsRegister[_ticketId].owner;
+        ticketsRegister[_ticketId].owner = payable(msg.sender);
+        ticketsRegister[_ticketId].isAvailableForSale = false;
+        ticketsRegister[_ticketId].amountPaid = msg.value;
+
+        (bool sent, bytes memory data) = previousOwner.call{value: msg.value}("");
+        require(sent, "Failed to send Ether");
+    }
 
 }
