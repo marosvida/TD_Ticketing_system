@@ -163,15 +163,25 @@ contract TicketingSystem {
 
         require(ticketsRegister[_ticketId].owner == msg.sender, "sender should be the owner");
         require(concertsRegister[ticketsRegister[_ticketId].concertId].concertDate - oneDay < block.timestamp, "should be used the d-day");
-
         require(concertsRegister[ticketsRegister[_ticketId].concertId].validatedByVenue == true, "should be validated by the venue");
+
         ticketsRegister[_ticketId].isAvailable = false;
+        ticketsRegister[_ticketId].owner = payable(address(0));
     }
 
     //FUNCTIONS TEST 4 -- BUY/TRANSFER
-    function buyTicket(uint256 _concertId) public payable {}
+    function buyTicket(uint256 _concertId) public payable {
+        require(msg.value == concertsRegister[_concertId].ticketPrice, "not the right price");
+        uint256 ticketId = ++ticketCount;
+        ticketsRegister[ticketId] = ticket(_concertId, payable(msg.sender), true, false, msg.value);
+        concertsRegister[_concertId].totalSoldTicket++;
+        concertsRegister[_concertId].totalMoneyCollected += msg.value;
+    }
 
-    function transferTicket(uint256 _ticketId, address payable _newOwner) public {}
+    function transferTicket(uint256 _ticketId, address payable _newOwner) public {
+        require(ticketsRegister[_ticketId].owner == msg.sender, "not the ticket owner");
+        ticketsRegister[_ticketId].owner = _newOwner;
+    }
 
     //FUNCTIONS TEST 5 -- CONCERT CASHOUT
     function cashOutConcert(uint256 _concertId, address payable _cashOutAddress) public {}
