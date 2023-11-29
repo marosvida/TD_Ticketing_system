@@ -51,8 +51,7 @@ contract VenueProfileTest is Test {
         vm.prank(user1);
         ticketingSystem.createVenue(venue1Name, venue1Capacity, venue1Commission);
         // Retrieving venue info
-        (bytes32 retrievedName1, uint256 retrievedCapacity1, uint256 retrievedCommission1, address owner1) =
-            ticketingSystem.venuesRegister(1);
+        (bytes32 retrievedName1, uint256 retrievedCapacity1, uint256 retrievedCommission1, address owner1) = ticketingSystem.venuesRegister(1);
         assertEq(retrievedName1, venue1Name);
 
         // Trying to modify venue profile with a wrong owner address
